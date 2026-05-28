@@ -12,7 +12,7 @@ import pandas as pd
 from ..baselines.features import extract_features
 from ..baselines.gbdt import GBDTBaseline
 from ..baselines.majority import MajorityClassifier
-from ..data.preprocess import preprocess
+from ..data.preprocess import detect_e0, preprocess
 from ..model.dataset import XanesDataset
 from ..model.ensemble import load_ensemble, train_ensemble
 from .calibration import (
@@ -30,19 +30,30 @@ def _records_from_parquet(path: Path) -> list[dict]:
     return pd.read_parquet(path).to_dict("records")
 
 
-def _hand_feature_matrix(records: list[dict]) -> np.ndarray:
-    feats = []
-    for rec in records:
+def _hand_feature_matrix(
+    records: list[dict], labels: list[int] | None = None
+) -> tuple[np.ndarray, np.ndarray | None]:
+    """Returns (X, y) where rows that failed preprocessing are dropped from both.
+
+    If `labels` is None, only X is returned with zero-fill for failures (test path).
+    """
+    feats, kept_labels = [], []
+    for i, rec in enumerate(records):
         e = np.asarray(rec["energies"], dtype=np.float64)
         y = np.asarray(rec["intensities"], dtype=np.float64)
         try:
             grid, y_norm = preprocess(e, y)
-            from ..data.preprocess import detect_e0
             e0 = detect_e0(e, y)
             feats.append(extract_features(grid, y_norm, e0=e0))
+            if labels is not None:
+                kept_labels.append(labels[i])
         except ValueError:
-            feats.append(np.zeros(6))
-    return np.vstack(feats)
+            if labels is None:
+                feats.append(np.zeros(6))
+    X = np.vstack(feats) if feats else np.empty((0, 6))
+    if labels is None:
+        return X, None
+    return X, np.asarray(kept_labels, dtype=int)
 
 
 def evaluate_element(
@@ -97,9 +108,8 @@ def evaluate_element(
     maj_pred = np.asarray(majority.predict(test_recs))
     maj_acc = top1_accuracy(test_y, maj_pred)
 
-    X_train = _hand_feature_matrix(train_recs)
-    X_test = _hand_feature_matrix(test_recs)
-    y_train = np.array([train_ds._ox_to_class[r["ox_state"]] for r in train_recs])
+    X_train, y_train = _hand_feature_matrix(train_recs, labels=train_ds.labels)
+    X_test, _ = _hand_feature_matrix(test_recs, labels=None)
     gbdt = GBDTBaseline(n_classes=train_ds.n_classes, random_state=0)
     gbdt.fit(X_train, y_train)
     gbdt_pred = gbdt.predict(X_test)
