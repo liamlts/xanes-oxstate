@@ -54,3 +54,22 @@ def ensemble_logits_dataset(
             all_logits.append(np.stack(l).mean(axis=0))
             all_y.append(np.asarray(y))
     return np.concatenate(all_logits), np.concatenate(all_y)
+
+
+def ensemble_per_model_logits_dataset(
+    models: list[torch.nn.Module],
+    dataset: XanesDataset,
+    batch_size: int = 128,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Returns logits per model: (n_models, n_samples, n_classes), plus labels."""
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    per_model = [[] for _ in models]
+    all_y = []
+    with torch.no_grad():
+        for x, y in loader:
+            for i, m in enumerate(models):
+                m.eval()
+                per_model[i].append(m(x).cpu().numpy())
+            all_y.append(np.asarray(y))
+    stacked = np.stack([np.concatenate(pm) for pm in per_model])
+    return stacked, np.concatenate(all_y)

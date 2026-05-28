@@ -23,7 +23,7 @@ from .calibration import (
 from .confusion import build_confusion, find_confused_pairs
 from .metrics import top1_accuracy, per_class_f1, ensemble_disagreement
 from .plots import reliability_diagram
-from .predict import ensemble_logits_dataset, ensemble_predict_dataset
+from .predict import ensemble_logits_dataset, ensemble_per_model_logits_dataset
 
 
 def _records_from_parquet(path: Path) -> list[dict]:
@@ -94,12 +94,10 @@ def evaluate_element(
     cnn_f1 = per_class_f1(test_y, test_pred, n_classes=train_ds.n_classes)
     ece = expected_calibration_error(test_probs, test_y)
 
-    # Ensemble disagreement on test
-    per_model_pred = []
-    for m in models:
-        logits, _ = ensemble_logits_dataset([m], test_ds)
-        per_model_pred.append(logits.argmax(axis=1))
-    disagree = ensemble_disagreement(np.stack(per_model_pred))
+    # Ensemble disagreement on test (single forward pass, all models)
+    per_model_logits, _ = ensemble_per_model_logits_dataset(models, test_ds)
+    per_model_pred = per_model_logits.argmax(axis=-1)
+    disagree = ensemble_disagreement(per_model_pred)
 
     # Baselines
     majority = MajorityClassifier().fit(

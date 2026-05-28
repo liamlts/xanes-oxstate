@@ -83,7 +83,7 @@ def train_one_seed(
             for x, y in val_loader:
                 x, y = x.to(device), torch.as_tensor(y, device=device)
                 logits = model(x)
-                v_losses.append(F.cross_entropy(logits, y, weight=weights).item())
+                v_losses.append(F.cross_entropy(logits, y).item())
                 correct += (logits.argmax(dim=1) == y).sum().item()
                 total += y.numel()
         history["val_loss"].append(float(np.mean(v_losses)))
