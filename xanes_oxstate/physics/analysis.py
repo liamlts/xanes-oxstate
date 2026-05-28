@@ -34,7 +34,7 @@ def pairwise_logistic_coefficients(
     """L2-regularized binary LR; returns per-energy-point coefficients."""
     if set(map(int, np.unique(y))) != {0, 1}:
         raise ValueError("y must be binary (0/1) for pairwise LR")
-    clf = LogisticRegression(C=C, max_iter=2000, penalty="l2")
+    clf = LogisticRegression(C=C, max_iter=2000)
     clf.fit(X, y)
     return clf.coef_.ravel()
 
