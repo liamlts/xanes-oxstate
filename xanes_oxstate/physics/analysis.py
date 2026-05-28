@@ -4,6 +4,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 import numpy as np
+from sklearn.linear_model import LogisticRegression
 
 
 def mean_spectrum_by_class(
@@ -25,3 +26,14 @@ def mean_spectrum_by_class(
             "hi": np.percentile(arr, 95, axis=0),
         }
     return means, envelopes
+
+
+def pairwise_logistic_coefficients(
+    X: np.ndarray, y: np.ndarray, C: float = 0.1
+) -> np.ndarray:
+    """L2-regularized binary LR; returns per-energy-point coefficients."""
+    if set(map(int, np.unique(y))) != {0, 1}:
+        raise ValueError("y must be binary (0/1) for pairwise LR")
+    clf = LogisticRegression(C=C, max_iter=2000, penalty="l2")
+    clf.fit(X, y)
+    return clf.coef_.ravel()
