@@ -42,3 +42,13 @@ def test_spectrum_is_frozen():
     )
     with pytest.raises((AttributeError, TypeError)):
         s.element = "Mn"
+
+
+def test_fake_xanes_fixture(mn_spectrum):
+    assert mn_spectrum.element == "Mn"
+    assert mn_spectrum.energy.shape == mn_spectrum.intensity.shape == (120,)
+
+
+def test_make_dataset_fixture(mn_dataset):
+    assert len(mn_dataset) == 60
+    assert {s.ox_state for s in mn_dataset} == {2, 3, 4}
