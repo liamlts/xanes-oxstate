@@ -24,7 +24,7 @@ class TrainResult:
 
 
 def _class_weights(ds: XanesDataset) -> torch.Tensor:
-    counts = Counter(int(ds[i][1]) for i in range(len(ds)))
+    counts = Counter(ds.labels)
     n_classes = ds.n_classes
     total = sum(counts.values())
     w = torch.zeros(n_classes)

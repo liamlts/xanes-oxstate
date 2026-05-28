@@ -41,3 +41,36 @@ def test_dataset_exposes_ox_state_mapping():
     assert ds.class_to_ox_state[0] in {2, 3, 4}
     inverse = {v: k for k, v in ds.class_to_ox_state.items()}
     assert ds[0][1] == inverse[ds.records[0]["ox_state"]]
+
+
+def test_dataset_cache_populated_when_cache_true():
+    import numpy as np
+    rng = np.random.default_rng(0)
+    e0 = 6539.0
+    recs = []
+    for i in range(5):
+        e = np.linspace(e0 - 30, e0 + 70, 400)
+        step = 1.0 / (1.0 + np.exp(-(e - e0)))
+        recs.append({
+            "mp_id": f"mp-{i}", "element": "Mn", "ox_state": 2,
+            "formula": f"Mn_{i}",
+            "energies": e.tolist(),
+            "intensities": (step + 0.01 * rng.standard_normal(400)).tolist(),
+        })
+    ds = XanesDataset(recs, cache=True)
+    assert hasattr(ds, "_cache")
+    assert len(ds._cache) == 5
+    # Verify cache is consistent with __getitem__
+    x0, y0 = ds[0]
+    assert x0.shape == (1, 200)
+
+
+def test_dataset_labels_property():
+    recs = [
+        {"mp_id": "a", "element": "Mn", "ox_state": 2, "formula": "MnO",
+         "energies": [0,1,2], "intensities": [0,1,2]},
+        {"mp_id": "b", "element": "Mn", "ox_state": 3, "formula": "MnO2",
+         "energies": [0,1,2], "intensities": [0,1,2]},
+    ]
+    ds = XanesDataset(recs, cache=False)
+    assert ds.labels == [0, 1]
