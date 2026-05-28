@@ -1,0 +1,16 @@
+element: Cu
+edge: K
+preprocessing:
+  grid_n: 200
+  grid_lo_ev: -10
+  grid_hi_ev: 40
+  max_extrap_ev: 5
+training:
+  epochs: 50
+  batch_size: 128
+  lr: 0.001
+  patience: 10
+  seeds: [0, 1, 2, 3, 4]
+split:
+  ratios: [0.7, 0.15, 0.15]
+  seed: 42

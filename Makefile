@@ -9,7 +9,7 @@ data:
 .PHONY: train
 train:
 	@for e in $(ELEMENTS); do \
-	  python -m xanes_oxstate.cli evaluate --element $$e; \
+	  python -m xanes_oxstate.cli evaluate --element $$e --config configs/$$e.yaml; \
 	done
 
 .PHONY: figures
