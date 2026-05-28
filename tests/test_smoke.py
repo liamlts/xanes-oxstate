@@ -56,3 +56,5 @@ def test_end_to_end_smoke(tmp_path):
     assert 0 <= out["accuracy"]["cnn"] <= 1
     assert (metrics / "Mn.json").exists()
     assert (metrics / "Mn_cm.npy").exists()
+    assert (metrics / "Mn_failures.parquet").exists()
+    assert (metrics / "Mn_reliability.png").exists()

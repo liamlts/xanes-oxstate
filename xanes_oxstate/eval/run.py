@@ -22,6 +22,7 @@ from .calibration import (
 )
 from .confusion import build_confusion, find_confused_pairs
 from .metrics import top1_accuracy, per_class_f1, ensemble_disagreement
+from .plots import reliability_diagram
 from .predict import ensemble_logits_dataset, ensemble_predict_dataset
 
 
@@ -105,6 +106,26 @@ def evaluate_element(
     gbdt_acc = top1_accuracy(test_y, gbdt_pred)
 
     cm = build_confusion(test_y, test_pred, n_classes=train_ds.n_classes)
+
+    # Failures parquet
+    failures = []
+    for i, rec in enumerate(test_recs):
+        if test_pred[i] != test_y[i]:
+            failures.append({
+                "mp_id": rec["mp_id"],
+                "formula": rec["formula"],
+                "true_class": int(test_y[i]),
+                "pred_class": int(test_pred[i]),
+                "confidence": float(test_probs[i].max()),
+                "spectrum": rec["intensities"],
+                "energies": rec["energies"],
+            })
+    pd.DataFrame(failures).to_parquet(metrics_dir / f"{element}_failures.parquet")
+
+    # Reliability diagram
+    reliability_diagram(test_probs, test_y,
+                        out_path=metrics_dir / f"{element}_reliability.png")
+
     confused = find_confused_pairs(test_y, test_pred,
                                    n_classes=train_ds.n_classes)
 
