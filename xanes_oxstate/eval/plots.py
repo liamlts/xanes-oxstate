@@ -89,3 +89,36 @@ def confusion_small_multiples(
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(out_path, dpi=300)
     return fig
+
+
+def reliability_diagram(
+    probs: np.ndarray, y: np.ndarray, n_bins: int = 15,
+    out_path: Path | None = None,
+):
+    conf = probs.max(axis=-1)
+    pred = probs.argmax(axis=-1)
+    correct = (pred == y).astype(np.float64)
+    bins = np.linspace(0, 1, n_bins + 1)
+    centers = 0.5 * (bins[:-1] + bins[1:])
+    acc = np.zeros(n_bins)
+    counts = np.zeros(n_bins)
+    for i in range(n_bins):
+        mask = (conf > bins[i]) & (conf <= bins[i + 1])
+        counts[i] = mask.sum()
+        if mask.any():
+            acc[i] = correct[mask].mean()
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+    ax.bar(centers, acc, width=1 / n_bins, alpha=0.7,
+           edgecolor="black", label="accuracy")
+    ax.plot([0, 1], [0, 1], "k--", linewidth=0.8, label="ideal")
+    ax.set_xlabel("confidence")
+    ax.set_ylabel("accuracy")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    if out_path is not None:
+        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=300)
+    return fig

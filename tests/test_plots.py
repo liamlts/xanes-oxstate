@@ -32,3 +32,17 @@ def test_confusion_small_multiples_writes_file(tmp_path):
     fig = confusion_small_multiples(cms, n_cols=2, out_path=out)
     assert out.exists()
     assert len(fig.axes) >= 2
+
+
+import numpy as np
+from xanes_oxstate.eval.plots import reliability_diagram
+
+
+def test_reliability_diagram_writes_file(tmp_path):
+    rng = np.random.default_rng(0)
+    probs = rng.dirichlet(alpha=[1, 1, 1], size=200)
+    y = probs.argmax(axis=1)
+    out = tmp_path / "rel.png"
+    fig = reliability_diagram(probs, y, n_bins=10, out_path=out)
+    assert out.exists()
+    assert fig.axes
