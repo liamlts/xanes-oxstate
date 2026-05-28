@@ -38,12 +38,18 @@ def split_records(
         formulas_seen.add(f)
         by_class[rec["ox_state"]].append(f)
 
+    import warnings
     formula_to_bucket: dict[str, str] = {}
-    for c, formulas in by_class.items():
-        shuffled = formulas[:]
-        rng.shuffle(shuffled)
-        n = len(shuffled)
-        for i, f in enumerate(shuffled):
+    for c in sorted(by_class):
+        formulas = sorted(by_class[c])
+        rng.shuffle(formulas)
+        n = len(formulas)
+        if n < 7:
+            warnings.warn(
+                f"class {c} has only {n} formulas; split will not populate all three buckets",
+                stacklevel=2,
+            )
+        for i, f in enumerate(formulas):
             formula_to_bucket[f] = _assign_bucket(i / max(n, 1), ratios)
 
     splits = {"train": [], "val": [], "test": []}

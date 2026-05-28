@@ -58,3 +58,30 @@ def test_split_raises_on_leakage_post_check():
     with pytest.raises(LeakageError):
         from xanes_oxstate.data.split import assert_no_leakage
         assert_no_leakage(splits)
+
+
+def test_split_warns_on_small_class():
+    import warnings
+    recs = []
+    for c in (2, 3, 4):
+        for f in range(3):
+            recs.append({
+                "mp_id": f"mp-{c}-{f}", "element": "Mn",
+                "ox_state": c, "formula": f"MnO_{c}_{f}",
+            })
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        split_records(recs, seed=42)
+        small_warns = [wi for wi in w if "formulas" in str(wi.message)]
+        assert len(small_warns) >= 1
+
+
+def test_split_is_order_invariant():
+    base = [
+        {"mp_id": f"mp-{c}-{f}", "element": "Mn", "ox_state": c,
+         "formula": f"MnO_{c}_{f}"}
+        for c in (2, 3, 4) for f in range(10)
+    ]
+    forward = split_records(base, seed=42)
+    backward = split_records(list(reversed(base)), seed=42)
+    assert {r["formula"] for r in forward["test"]} == {r["formula"] for r in backward["test"]}
