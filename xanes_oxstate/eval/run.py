@@ -1,6 +1,8 @@
 """End-to-end per-element evaluation: train ensemble + baselines, report metrics."""
 from __future__ import annotations
 
+import torch  # noqa: F401  (must precede lightgbm to avoid libomp dual-load on macOS)
+
 import json
 from pathlib import Path
 

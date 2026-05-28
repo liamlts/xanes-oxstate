@@ -12,6 +12,9 @@ from __future__ import annotations
 
 import numpy as np
 
+# np.trapezoid was added in NumPy 2.0; np.trapz is the 1.x name (deprecated in 2.x but still works).
+_trapezoid = getattr(np, "trapezoid", np.trapz)
+
 
 def extract_features(
     energy: np.ndarray, intensity: np.ndarray, e0: float
@@ -21,7 +24,7 @@ def extract_features(
 
     pre_mask = (rel >= -10) & (rel <= -1)
     if pre_mask.any():
-        out[0] = float(np.trapezoid(intensity[pre_mask], rel[pre_mask]))
+        out[0] = float(_trapezoid(intensity[pre_mask], rel[pre_mask]))
         out[1] = float(intensity[pre_mask].max())
 
     edge_mask = (rel >= -5) & (rel <= 10)
