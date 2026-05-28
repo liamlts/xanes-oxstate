@@ -5,18 +5,16 @@ from xanes_oxstate.data.fetch import fetch_element_spectra
 
 
 def _mock_doc(mp_id, element, ox, formula, energies, intensities):
-    doc = MagicMock()
+    doc = MagicMock(spec=["material_id", "formula_pretty", "absorbing_element",
+                          "spectrum", "composition"])
     doc.material_id = mp_id
     doc.formula_pretty = formula
     doc.absorbing_element = element
     doc.spectrum = MagicMock(
         x=list(energies), y=list(intensities), absorbing_index=0
     )
-    doc.structure = MagicMock()
-    doc.structure.species_and_occu = [{element: 1.0}]
-    doc.structure.composition.oxi_state_guesses = MagicMock(
-        return_value=[{element: ox}]
-    )
+    doc.composition = MagicMock()
+    doc.composition.oxi_state_guesses = MagicMock(return_value=[{element: ox}])
     return doc
 
 
