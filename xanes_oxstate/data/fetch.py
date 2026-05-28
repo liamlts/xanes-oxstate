@@ -77,14 +77,16 @@ def fetch_element_spectra(
             absorbing_element=element, edge=edge, spectrum_type="XANES"
         )
 
+    tmp = out.with_suffix(".jsonl.tmp")
     n = 0
-    with out.open("w") as f:
+    with tmp.open("w") as f:
         for doc in docs:
             rec = _doc_to_record(doc)
             if rec is None:
                 continue
             f.write(json.dumps(rec) + "\n")
             n += 1
+    os.replace(tmp, out)
     return out
 
 
