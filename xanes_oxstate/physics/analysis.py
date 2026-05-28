@@ -1,7 +1,7 @@
 """Confused-pair analysis: overlay, LR feature inspection, structural bins."""
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -37,3 +37,17 @@ def pairwise_logistic_coefficients(
     clf = LogisticRegression(C=C, max_iter=2000, penalty="l2")
     clf.fit(X, y)
     return clf.coef_.ravel()
+
+
+def group_failures_by_field(
+    failures: list[dict],
+    field: str,
+    true_class: int,
+    pred_class: int,
+) -> dict:
+    matched = [
+        f for f in failures
+        if f.get("true") == true_class and f.get("pred") == pred_class
+        and field in f
+    ]
+    return dict(Counter(f[field] for f in matched))
