@@ -118,6 +118,35 @@ def evaluate_element(
     gbdt_pred = gbdt.predict(X_test)
     gbdt_acc = top1_accuracy(test_y, gbdt_pred)
 
+    # Stacking: convex blend of CNN ensemble probs with GBDT probs,
+    # weight learned on val to maximize top-1 accuracy.
+    # Use val_ds.records (post-filter) so hand-feature labels align with the
+    # CNN val_logits produced from the same filtered dataset.
+    X_val, y_val_kept = _hand_feature_matrix(val_ds.records, labels=val_ds.labels)
+    val_probs_cnn = _softmax(apply_temperature(val_logits, T))
+    val_probs_gbdt = gbdt.predict_proba(X_val)
+    # Sanity: only stack if shapes line up (drop on val may mismatch CNN length).
+    if val_probs_cnn.shape == val_probs_gbdt.shape:
+        alphas = np.linspace(0.0, 1.0, 21)
+        best_alpha, best_acc = 0.0, -1.0
+        for a in alphas:
+            blend = a * val_probs_cnn + (1 - a) * val_probs_gbdt
+            acc = top1_accuracy(y_val_kept, blend.argmax(axis=1))
+            if acc > best_acc:
+                best_acc, best_alpha = acc, float(a)
+        # Apply on test
+        test_probs_gbdt = gbdt.predict_proba(X_test)
+        if test_probs_gbdt.shape == test_probs.shape:
+            stack_probs = best_alpha * test_probs + (1 - best_alpha) * test_probs_gbdt
+            stack_pred = stack_probs.argmax(axis=1)
+            stack_acc = top1_accuracy(test_y, stack_pred)
+        else:
+            stack_acc = float(cnn_acc)
+            best_alpha = 1.0
+    else:
+        stack_acc = float(cnn_acc)
+        best_alpha = 1.0
+
     cm = build_confusion(test_y, test_pred, n_classes=train_ds.n_classes)
 
     # Failures parquet
@@ -158,6 +187,8 @@ def evaluate_element(
             for p in confused
         ],
     }
+    metrics["accuracy"]["stack"] = float(stack_acc)
+    metrics["stack_alpha"] = best_alpha
     (metrics_dir / f"{element}.json").write_text(json.dumps(metrics, indent=2))
     np.save(metrics_dir / f"{element}_cm.npy", cm)
     return metrics

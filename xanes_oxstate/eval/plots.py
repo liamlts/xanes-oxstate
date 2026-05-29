@@ -13,9 +13,9 @@ def per_element_accuracy_bar(
     out_path: Path | None = None,
 ):
     elements = list(results.keys())
-    estimators = ["majority", "gbdt", "cnn"]
+    estimators = ["majority", "gbdt", "cnn", "stack"]
     x = np.arange(len(elements))
-    w = 0.25
+    w = 0.2
 
     fig, ax = plt.subplots(figsize=(8, 4))
     for i, est in enumerate(estimators):
@@ -24,7 +24,7 @@ def per_element_accuracy_bar(
             [errs.get(e, {}).get(est, 0.0) for e in elements]
             if errs else None
         )
-        ax.bar(x + (i - 1) * w, vals, w, yerr=yerr, label=est, capsize=3)
+        ax.bar(x + (i - 1.5) * w, vals, w, yerr=yerr, label=est, capsize=3)
 
     ax.set_xticks(x)
     ax.set_xticklabels(elements)
@@ -32,7 +32,9 @@ def per_element_accuracy_bar(
     ax.axhline(0.85, color="black", linestyle="--", linewidth=0.8)
     ax.set_ylim(0, 1.0)
     ax.set_ylabel("top-1 accuracy")
-    ax.set_title("Per-element accuracy: majority vs. GBDT vs. CNN ensemble")
+    ax.set_title(
+        "Per-element accuracy: majority vs. GBDT vs. CNN ensemble vs. stack"
+    )
     ax.legend(loc="lower right", fontsize=8)
     fig.tight_layout()
 
