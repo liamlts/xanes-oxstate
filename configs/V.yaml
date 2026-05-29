@@ -6,10 +6,10 @@ preprocessing:
   grid_hi_ev: 40
   max_extrap_ev: 5
 training:
-  epochs: 50
+  epochs: 100
   batch_size: 128
   lr: 0.001
-  patience: 10
+  patience: 20
   seeds: [0, 1, 2, 3, 4]
 split:
   ratios: [0.7, 0.15, 0.15]
