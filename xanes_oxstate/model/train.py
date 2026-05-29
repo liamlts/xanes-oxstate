@@ -10,7 +10,7 @@ import torch
 import torch.nn.functional as F
 from torch.optim import Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from .cnn import OxStateCNN
 from .dataset import XanesDataset
@@ -48,8 +48,18 @@ def train_one_seed(
     np.random.seed(seed)
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
+    # Class-balanced sampling: oversample minority classes so each batch is
+    # roughly uniform over classes, not over the (imbalanced) training set.
+    labels = train_ds.labels
+    counts = Counter(labels)
+    sample_weights = torch.tensor(
+        [1.0 / counts[lbl] for lbl in labels], dtype=torch.double
+    )
+    sampler = WeightedRandomSampler(
+        weights=sample_weights, num_samples=len(labels), replacement=True
+    )
     train_loader = DataLoader(
-        train_ds, batch_size=batch_size, shuffle=True, num_workers=0
+        train_ds, batch_size=batch_size, sampler=sampler, num_workers=0
     )
     val_loader = DataLoader(val_ds, batch_size=batch_size)
 
