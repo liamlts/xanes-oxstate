@@ -73,7 +73,7 @@ def evaluate_element(
     val_recs_raw = _records_from_parquet(processed_dir / f"{element}_val.parquet")
     test_recs_raw = _records_from_parquet(processed_dir / f"{element}_test.parquet")
 
-    train_ds = XanesDataset(train_recs_raw)
+    train_ds = XanesDataset(train_recs_raw, augment=True)
     val_ds = XanesDataset(val_recs_raw)
     test_ds = XanesDataset(test_recs_raw)
 

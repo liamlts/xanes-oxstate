@@ -74,3 +74,28 @@ def test_dataset_labels_property():
     ]
     ds = XanesDataset(recs, cache=False)
     assert ds.labels == [0, 1]
+
+
+def test_dataset_augmentation_changes_outputs():
+    import numpy as np
+    from xanes_oxstate.model.dataset import XanesDataset
+    rng = np.random.default_rng(0)
+    e0 = 6539.0
+    recs = []
+    for i in range(3):
+        e = np.linspace(e0 - 30, e0 + 70, 400)
+        step = 1.0 / (1.0 + np.exp(-(e - e0)))
+        recs.append({
+            "mp_id": f"mp-{i}", "element": "Mn", "ox_state": 2,
+            "formula": f"Mn_{i}",
+            "energies": e.tolist(),
+            "intensities": (step + 0.01 * rng.standard_normal(400)).tolist(),
+        })
+    ds = XanesDataset(recs, cache=True, augment=True, roll_max=5)
+    seen = set()
+    torch.random.manual_seed(0)
+    for _ in range(20):
+        x, _ = ds[0]
+        seen.add(int(x.argmax().item()))
+    # With 20 random rolls in [-5, 5] we should see at least 2 distinct argmax positions
+    assert len(seen) >= 2, f"augmentation didn't vary output (saw {seen})"

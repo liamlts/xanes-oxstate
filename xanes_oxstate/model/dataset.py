@@ -10,9 +10,16 @@ from ..data.preprocess import preprocess
 
 class XanesDataset(Dataset):
     def __init__(
-        self, records: list[dict], e0: float | None = None, cache: bool = True
+        self,
+        records: list[dict],
+        e0: float | None = None,
+        cache: bool = True,
+        augment: bool = False,
+        roll_max: int = 2,
     ):
         self.e0 = e0
+        self.augment = augment
+        self.roll_max = roll_max
         self._cache: list[tuple[torch.Tensor, int]] = []
 
         if cache:
@@ -56,13 +63,21 @@ class XanesDataset(Dataset):
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, int]:
         if self._cache:
-            return self._cache[idx]
-        rec = self.records[idx]
-        energy = np.asarray(rec["energies"], dtype=np.float64)
-        intensity = np.asarray(rec["intensities"], dtype=np.float64)
-        _, y = preprocess(energy, intensity, e0=self.e0)
-        x = torch.from_numpy(y).float().unsqueeze(0)  # [1, 200]
-        return x, self._ox_to_class[rec["ox_state"]]
+            x, y = self._cache[idx]
+        else:
+            rec = self.records[idx]
+            energy = np.asarray(rec["energies"], dtype=np.float64)
+            intensity = np.asarray(rec["intensities"], dtype=np.float64)
+            _, y_norm = preprocess(energy, intensity, e0=self.e0)
+            x = torch.from_numpy(y_norm).float().unsqueeze(0)  # [1, 200]
+            y = self._ox_to_class[rec["ox_state"]]
+        if self.augment and self.roll_max > 0:
+            shift = int(
+                torch.randint(-self.roll_max, self.roll_max + 1, (1,)).item()
+            )
+            if shift != 0:
+                x = torch.roll(x, shifts=shift, dims=-1)
+        return x, y
 
     @property
     def n_classes(self) -> int:
