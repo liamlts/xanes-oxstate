@@ -69,13 +69,18 @@ def evaluate_element(
     metrics_dir = Path(metrics_dir)
     metrics_dir.mkdir(parents=True, exist_ok=True)
 
-    train_recs = _records_from_parquet(processed_dir / f"{element}_train.parquet")
-    val_recs = _records_from_parquet(processed_dir / f"{element}_val.parquet")
-    test_recs = _records_from_parquet(processed_dir / f"{element}_test.parquet")
+    train_recs_raw = _records_from_parquet(processed_dir / f"{element}_train.parquet")
+    val_recs_raw = _records_from_parquet(processed_dir / f"{element}_val.parquet")
+    test_recs_raw = _records_from_parquet(processed_dir / f"{element}_test.parquet")
 
-    train_ds = XanesDataset(train_recs)
-    val_ds = XanesDataset(val_recs)
-    test_ds = XanesDataset(test_recs)
+    train_ds = XanesDataset(train_recs_raw)
+    val_ds = XanesDataset(val_recs_raw)
+    test_ds = XanesDataset(test_recs_raw)
+
+    # Use the post-filter records (XanesDataset drops bad-edge-jump spectra) for all
+    # downstream baselines / outputs so indices line up with test_y / test_pred.
+    train_recs = train_ds.records
+    test_recs = test_ds.records
 
     train_ensemble(
         train_ds, val_ds,
