@@ -1,0 +1,15 @@
+{
+  "element": "Cr",
+  "raw": 718,
+  "kept": 566,
+  "dropped_short": 0,
+  "dropped_nan": 0,
+  "dropped_dup": 103,
+  "dropped_rare_class": 49,
+  "final_class_counts": {
+    "4": 73,
+    "3": 295,
+    "2": 143,
+    "5": 55
+  }
+}

@@ -23,9 +23,10 @@ def train_ensemble(
     paths: list[Path] = []
     for s in seeds:
         path = ckpt_dir / f"{element}_seed{s}.pt"
-        train_one_seed(
-            train_ds, val_ds, seed=s, ckpt_path=path, **train_kwargs
-        )
+        if not path.exists():
+            train_one_seed(
+                train_ds, val_ds, seed=s, ckpt_path=path, **train_kwargs
+            )
         paths.append(path)
     return paths
 

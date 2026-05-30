@@ -7,5 +7,6 @@ data/raw/
 data/processed/
 checkpoints/
 runs/
+*.log
 .ipynb_checkpoints/
 .DS_Store

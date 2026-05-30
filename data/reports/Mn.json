@@ -1,0 +1,14 @@
+{
+  "element": "Mn",
+  "raw": 1460,
+  "kept": 981,
+  "dropped_short": 0,
+  "dropped_nan": 0,
+  "dropped_dup": 450,
+  "dropped_rare_class": 29,
+  "final_class_counts": {
+    "2": 496,
+    "4": 180,
+    "3": 305
+  }
+}

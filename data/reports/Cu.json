@@ -1,0 +1,13 @@
+{
+  "element": "Cu",
+  "raw": 1477,
+  "kept": 956,
+  "dropped_short": 0,
+  "dropped_nan": 0,
+  "dropped_dup": 520,
+  "dropped_rare_class": 1,
+  "final_class_counts": {
+    "2": 848,
+    "3": 108
+  }
+}

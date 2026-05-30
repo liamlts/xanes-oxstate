@@ -1,0 +1,13 @@
+{
+  "element": "Fe",
+  "raw": 1458,
+  "kept": 816,
+  "dropped_short": 0,
+  "dropped_nan": 0,
+  "dropped_dup": 595,
+  "dropped_rare_class": 47,
+  "final_class_counts": {
+    "3": 481,
+    "2": 335
+  }
+}

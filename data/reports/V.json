@@ -1,0 +1,15 @@
+{
+  "element": "V",
+  "raw": 1162,
+  "kept": 829,
+  "dropped_short": 0,
+  "dropped_nan": 0,
+  "dropped_dup": 332,
+  "dropped_rare_class": 1,
+  "final_class_counts": {
+    "4": 310,
+    "5": 209,
+    "2": 135,
+    "3": 175
+  }
+}

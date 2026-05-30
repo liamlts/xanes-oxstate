@@ -1,21 +1,22 @@
-"""LightGBM wrapper over the hand-feature vector."""
+"""Gradient-boosting baseline over the hand-feature vector.
+
+Uses sklearn's HistGradientBoostingClassifier rather than LightGBM to avoid
+the macOS torch + lightgbm libomp dual-load segfault.
+"""
 from __future__ import annotations
 
-import lightgbm as lgb
 import numpy as np
+from sklearn.ensemble import HistGradientBoostingClassifier
 
 
 class GBDTBaseline:
     def __init__(self, n_classes: int, random_state: int = 0) -> None:
         self.n_classes = n_classes
-        self.model = lgb.LGBMClassifier(
-            objective="multiclass" if n_classes > 2 else "binary",
-            num_class=n_classes if n_classes > 2 else 1,
-            n_estimators=200,
+        self.model = HistGradientBoostingClassifier(
+            max_iter=200,
             learning_rate=0.05,
-            num_leaves=31,
+            max_leaf_nodes=31,
             random_state=random_state,
-            verbose=-1,
         )
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> "GBDTBaseline":

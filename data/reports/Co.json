@@ -1,0 +1,14 @@
+{
+  "element": "Co",
+  "raw": 922,
+  "kept": 787,
+  "dropped_short": 0,
+  "dropped_nan": 0,
+  "dropped_dup": 134,
+  "dropped_rare_class": 1,
+  "final_class_counts": {
+    "4": 132,
+    "3": 251,
+    "2": 404
+  }
+}
