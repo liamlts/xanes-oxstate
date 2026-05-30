@@ -97,3 +97,7 @@ export KMP_DUPLICATE_LIB_OK=TRUE
 XANES spectra obtained from the Materials Project (CC-BY 4.0).
 Oxidation states retrieved via the MP summary endpoint's BVAnalyzer-
 precomputed `possible_species` field.
+
+## License
+
+MIT — see [`LICENSE`](LICENSE). Materials Project data is CC-BY 4.0.
