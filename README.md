@@ -38,6 +38,21 @@ case (stacking with α=0.15 — heavy GBDT weight — recovers +8.5 pp on
 Cr alone). Cu is dominated by its 88% Cu²⁺ majority class; no estimator
 meaningfully surpasses the trivial baseline.
 
+### Confusion matrices
+
+Per-element confusion matrices (test fold) — most errors are ±1 oxidation
+state, as expected from edge-shift physics:
+
+![confusion matrices](figures/confusions.png)
+
+### Calibration
+
+Temperature scaling keeps the CNN ensemble's confidence honest. Example
+reliability diagram (Mn); per-element diagrams for all 8 metals are in
+[`metrics/`](metrics/):
+
+![Mn reliability](metrics/Mn_reliability.png)
+
 ## Limitations and known shortfalls
 
 This is a first-cut portfolio implementation, not a polished benchmark.
