@@ -32,22 +32,22 @@ Per-element breakdown:
 
 Bold = best of {Maj, GBDT, CNN, Stack} for that element.
 
-The CNN ensemble strictly beats the majority baseline on 7/8 elements
-and beats the GBDT baseline on 5/8. Cr is genuinely a GBDT-friendly
-case (stacking with α=0.15 — heavy GBDT weight — recovers +8.5 pp on
-Cr alone). Cu is dominated by its 88% Cu²⁺ majority class; no estimator
-meaningfully surpasses the trivial baseline.
+The CNN ensemble beats the majority baseline on 7/8 elements and beats
+the GBDT baseline on 5/8. Cr is a GBDT-friendly case: stacking with
+α=0.15 (heavy GBDT weight) recovers +8.5 pp on Cr alone. Cu is dominated
+by its 88% Cu²⁺ majority class, and no estimator meaningfully surpasses
+the trivial baseline.
 
 ### Confusion matrices
 
-Per-element confusion matrices (test fold) — most errors are ±1 oxidation
+Per-element confusion matrices (test fold). Most errors are ±1 oxidation
 state, as expected from edge-shift physics:
 
 ![confusion matrices](figures/confusions.png)
 
 ### Calibration
 
-Temperature scaling keeps the CNN ensemble's confidence honest. Example
+Temperature scaling calibrates the CNN ensemble's confidence. Example
 reliability diagram (Mn); per-element diagrams for all 8 metals are in
 [`metrics/`](metrics/):
 
@@ -55,20 +55,20 @@ reliability diagram (Mn); per-element diagrams for all 8 metals are in
 
 ## Limitations and known shortfalls
 
-This is a first-cut portfolio implementation, not a polished benchmark.
-Honest constraints:
+This is a first-cut implementation, not a polished benchmark. Known
+constraints:
 
-- **Spec target was ≥0.85 overall accuracy; achieved 0.70.** The model
-  is functioning well above chance and beats hand-engineered baselines
-  on most elements, but does not hit the project's original goal.
-- **Edge-jump normalization drops 3–5% of FEFF spectra** with the
+- Spec target was ≥0.85 overall accuracy; achieved 0.70. The model
+  runs well above chance and beats hand-engineered baselines on most
+  elements, but does not hit the project's original goal.
+- Edge-jump normalization drops 3–5% of FEFF spectra with the
   constant-mean baseline (down from ~35% under the original linear-fit
   form; see `xanes_oxstate/data/preprocess.py`).
-- **Severe class imbalance** on Cu (88% Cu²⁺) and Cr (4 classes, two
-  with ≤55 examples each); rebalancing experiments with
+- Severe class imbalance on Cu (88% Cu²⁺) and Cr (4 classes, two
+  with ≤55 examples each). Rebalancing experiments with
   `WeightedRandomSampler` made the prior mismatch worse, not better.
-- **Stacking via convex combination on a small val set** overfits the
-  α parameter — gains on Cr are offset by losses on Cu.
+- Stacking via convex combination on a small val set overfits the
+  α parameter; gains on Cr are offset by losses on Cu.
 
 Possible next steps if you wanted to push further (not implemented):
 multi-element joint training with element conditioning, transformer
@@ -85,9 +85,9 @@ export MP_API_KEY=<your_key>           # https://materialsproject.org/api
 make all                                # data → train → figures
 ```
 
-`make all` is data fetch (~2 min, 8 elements via MP summary endpoint
-species lookup) → train ensemble (~90 min, 8 × 5 seeds × ≤100 epochs
-on CPU) → figures (~5 s).
+`make all` runs data fetch (~2 min, 8 elements via MP summary endpoint
+species lookup), then trains the ensemble (~90 min, 8 × 5 seeds × ≤100
+epochs on CPU), then writes figures (~5 s).
 
 Recommended environment vars for macOS to avoid the torch/lightgbm
 libomp dual-load deadlock:
@@ -100,12 +100,12 @@ export KMP_DUPLICATE_LIB_OK=TRUE
 
 ## Layout
 
-- `xanes_oxstate/` — the package (data, model, eval, baselines, physics)
-- `notebooks/xanes_oxstate.ipynb` — end-to-end walkthrough for one element
-- `configs/<element>.yaml` — per-element hyperparameters
-- `docs/` — data card, methods, physics findings
-- `figures/` — versioned headline figures
-- `metrics/` — per-element JSON + npy + reliability diagram + failures parquet
+- `xanes_oxstate/`: the package (data, model, eval, baselines, physics)
+- `notebooks/xanes_oxstate.ipynb`: end-to-end walkthrough for one element
+- `configs/<element>.yaml`: per-element hyperparameters
+- `docs/`: data card, methods, physics findings
+- `figures/`: versioned headline figures
+- `metrics/`: per-element JSON + npy + reliability diagram + failures parquet
 
 ## Acknowledgements
 
@@ -115,4 +115,4 @@ precomputed `possible_species` field.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE). Materials Project data is CC-BY 4.0.
+MIT. See [`LICENSE`](LICENSE). Materials Project data is CC-BY 4.0.
