@@ -12,8 +12,11 @@ from __future__ import annotations
 
 import numpy as np
 
-# np.trapezoid was added in NumPy 2.0; np.trapz is the 1.x name (deprecated in 2.x but still works).
-_trapezoid = getattr(np, "trapezoid", np.trapz)
+# np.trapezoid was added in NumPy 2.0 and np.trapz was removed in NumPy 2.x.
+# Pick lazily so np.trapz is only referenced on NumPy 1.x where it still exists
+# (getattr(np, "trapezoid", np.trapz) would eagerly evaluate np.trapz and raise
+# AttributeError on NumPy 2.x before the fallback is needed).
+_trapezoid = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
 
 
 def extract_features(
