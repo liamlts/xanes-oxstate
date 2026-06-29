@@ -1,5 +1,8 @@
 # xanes-oxstate
 
+[![CI](https://github.com/liamlts/xanes-oxstate/actions/workflows/ci.yml/badge.svg)](https://github.com/liamlts/xanes-oxstate/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Oxidation-state classification from K-edge XANES spectra across eight
 3d transition metals (Ti, V, Cr, Mn, Fe, Co, Ni, Cu), trained on the
 public Materials Project XAS database with a small 1D-CNN ensemble.
